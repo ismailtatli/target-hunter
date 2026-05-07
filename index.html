@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TARGET HUNTER</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="game-wrapper">
+
+    <div id="ui" class="hud-bar">
+        <div class="hud-item"><span class="label">AGENT</span><span id="displayName" class="value">---</span></div>
+        <div class="hud-item"><span class="label">LEVEL</span><span id="level" class="value">1</span></div>
+        <div class="hud-item highlight"><span class="label">SCORE</span><span id="score" class="value">0</span></div>
+        <div class="hud-item combo-hud"><span class="label">COMBO</span><span id="combo" class="value">×1</span></div>
+        <div class="hud-item health-hud"><span class="label">HEALTH</span><span id="lives" class="value">❤️❤️❤️</span></div>
+        <div class="hud-item timer-hud"><span class="label">TIME</span><span id="time" class="value">60</span><span class="label">s</span></div>
+    </div>
+
+    <div class="prog-wrap">
+        <div class="prog-track"><div id="progFill" class="prog-fill"></div></div>
+        <span id="progLabel" class="prog-label">0 / 300 → LV 2</span>
+    </div>
+
+    <div class="canvas-container">
+        <canvas id="gameCanvas" width="950" height="580"></canvas>
+
+        <div id="startScreen" class="overlay">
+            <div class="scanlines"></div>
+            <div class="start-layout">
+            <div class="divider"></div>
+
+                <div class="start-left">
+                    <div class="title-block">
+                        <div class="title-badge">TARGET HUNTER · ARCADE AIM TRAINING</div>
+                        <h1 class="main-title">TARGET<br><span class="accent">HUNTER</span></h1>
+                        <div class="title-underline"><span></span><em>AIM · SCORE · SURVIVE</em><span></span></div>
+                        <p class="lore-text">
+                            Shoot green enemy targets before time expires.
+                            Avoid red civilians, collect time bonuses, and survive as long as possible.
+                            Every level increases target speed, target size changes, and spawn pressure.
+                        </p>
+                    </div>
+
+                    <div class="callsign-block">
+                        <label class="cs-label">◈ ENTER CALLSIGN</label>
+                        <input type="text" id="nicknameInput" placeholder="GHOST" maxlength="12" autocomplete="off" spellcheck="false">
+                        <button id="startBtn" class="start-cta">
+                            <span class="cta-icon">▶</span>
+                            <span>START GAME</span>
+                            <div class="cta-ring"></div>
+                        </button>
+                        <div id="bestScoreDisplay" class="best-score-display"></div>
+                    </div>
+
+                    <div class="combo-explainer">
+                        <div class="ce-title">⚡ COMBO SYSTEM</div>
+                        <div class="ce-steps">
+                            <div class="ce-step"><span class="ce-n">1</span><span class="ce-t">Build combo from ×1 up to ×8 by hitting targets in a row.</span></div>
+                            <div class="ce-step"><span class="ce-n">2</span><span class="ce-t">Hit again within 2 seconds to keep the combo active.</span></div>
+                            <div class="ce-step"><span class="ce-n">3</span><span class="ce-t">Misses, civilians, escaped enemies, or waiting too long reset combo.</span></div>
+                        </div>
+                        <div class="ce-example">
+                            <span class="ce-hit">HIT</span>
+                            <span class="ce-arr">→</span>
+                            <span class="ce-hit">×1</span>
+                            <span class="ce-arr">→</span>
+                            <span class="ce-hit">×2</span>
+                            <span class="ce-arr">→</span>
+                            <span class="ce-hit">×3</span>
+                            <span class="ce-arr">→</span>
+                            <span class="ce-hit">×8</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="start-right">
+                    <div class="intel-header">◈ GAME TARGETS ◈</div>
+
+                    <div class="intel-card c-green">
+                        <div class="iicon green-i"><span class="ih ih-h"></span><span class="ih ih-v"></span></div>
+                        <div class="iinfo">
+                            <div class="iname">ENEMY TARGET</div>
+                            <div class="ipts" style="color:#00ff88">+10 × COMBO MULTIPLIER</div>
+                            <div class="idesc">Shrinks each level. Chain clean hits to increase your score multiplier.</div>
+                        </div>
+                        <div class="ibadge engage">ENGAGE</div>
+                    </div>
+
+                    <div class="intel-card c-red">
+                        <div class="iicon red-i"><span class="ih ih-h"></span><span class="ih ih-v"></span></div>
+                        <div class="iinfo">
+                            <div class="iname">CIVILIAN</div>
+                            <div class="ipts" style="color:#ff3366">−20 PTS · −1 LIFE · COMBO RESET</div>
+                            <div class="idesc">Grows every level. Hitting it costs life and resets combo.</div>
+                        </div>
+                        <div class="ibadge avoid">AVOID</div>
+                    </div>
+
+                    <div class="intel-card c-blue">
+                        <div class="iicon blue-i"><span class="ih ih-h"></span><span class="ih ih-v"></span></div>
+                        <div class="iinfo">
+                            <div class="iname">CHRONO</div>
+                            <div class="ipts" style="color:#00d9ff">+5 SECONDS + 5 PTS</div>
+                            <div class="idesc">Fast time bonus target. Adds extra seconds and points.</div>
+                        </div>
+                        <div class="ibadge priority">PRIORITY</div>
+                    </div>
+
+                    <div class="intel-card c-orange">
+                        <div class="iicon orange-i"><span class="ih ih-h"></span><span class="ih ih-v"></span></div>
+                        <div class="iinfo">
+                            <div class="iname">ELITE TARGET</div>
+                            <div class="ipts" style="color:#ff9900">+50 × COMBO</div>
+                            <div class="idesc">High-value target. Harder to hit, worth much more points.</div>
+                        </div>
+                        <div class="ibadge hv">HIGH VALUE</div>
+                    </div>
+
+                    <div class="intel-card c-ice">
+                        <div class="iicon ice-i"><span class="ih ih-h"></span><span class="ih ih-v"></span></div>
+                        <div class="iinfo">
+                            <div class="iname">ICE CRYSTAL ❄</div>
+                            <div class="ipts" style="color:#a0eeff">FREEZE ALL TARGETS FOR 3 SECONDS</div>
+                            <div class="idesc">Rare freeze bonus. Useful when the screen gets crowded.</div>
+                        </div>
+                        <div class="ibadge tactical">TACTICAL</div>
+                    </div>
+
+                    <div class="level-formula">
+                        <div class="formula-title">▸ PROGRESSION SYSTEM</div>
+                        <div class="formula-row"><span class="fl">LEVEL UP</span><span class="fv">Every <b>300 pts</b> → +1 Level</span></div>
+                        <div class="formula-row"><span class="fl">SPEED</span><span class="fv">Velocity and spawn rhythm increase</span></div>
+                        <div class="formula-row"><span class="fl">TARGETS</span><span class="fv">Enemies shrink · civilians grow and appear more</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="pauseScreen" class="pause-screen hidden">
+            <div class="pause-panel">
+                <div class="pause-title">PAUSED</div>
+                <div class="pause-sub">Press SPACE to resume</div>
+            </div>
+        </div>
+
+        <div id="gameOverScreen" class="overlay hidden go-overlay">
+            <div class="go-panel">
+                <div class="go-top">
+                    <h2 id="endMsg">GAME OVER</h2>
+                    <div id="hsBadge" class="hs-badge hidden">🏆 NEW HIGH SCORE</div>
+                </div>
+                <div id="finalStats" class="final-stats"></div>
+                <div id="leaderboardList" class="lb-list"></div>
+                <button id="restartBtn">↺ &nbsp;PLAY AGAIN</button>
+            </div>
+        </div>
+
+        <div id="comboFlash" class="combo-flash hidden"></div>
+
+        <div id="levelUpBanner" class="lvl-banner hidden"></div>
+        <div id="freezeOverlay" class="freeze-ov hidden"></div>
+    </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
